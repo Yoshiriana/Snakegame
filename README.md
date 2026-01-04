@@ -1,11 +1,12 @@
-# Snakegame
+# Snake Game
 import pygame
 import random
 import sys
+import os
 
 pygame.init()
 
-# Screen dimensions
+# Screen dimensions (screen and colors)
 WIDTH, HEIGHT = 600, 600
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Snake Game")
@@ -25,13 +26,22 @@ FOOD_COLORS = [RED, GREEN, BLUE]  # Now fixed 3 colors for the food
 SNAKE_COLORS = [GREEN, RED, PURPLE, BLUE]
 color_index = 0
 
-# Load the background image
+# background image
 background_image = pygame.image.load("iceberg.jpg")
 background_image = pygame.transform.scale(background_image, (WIDTH, HEIGHT))  # Resize to fit screen
 
+# Check and load the fish image for food
+try:
+    fish_image = pygame.image.load("fish.png")
+    fish_image = pygame.transform.scale(fish_image, (30, 30))  # Resize to a smaller size (30x30)
+except pygame.error as e:
+    print(f"Error loading fish image: {e}")
+    pygame.quit()
+    sys.exit()
+
 # Clock
 clock = pygame.time.Clock()
-SPEED = 6  # Set slower speed initially (lower number = slower)
+SPEED = 6 
 
 # Fonts
 font_big = pygame.font.SysFont("arial", 40)
@@ -46,6 +56,8 @@ SEGMENT_MARGIN = 2  # Small margin between segments to enhance the visual effect
 BUTTON_WIDTH = 250
 BUTTON_HEIGHT = 50
 
+# Debug: Print the current working directory to confirm the location of the script and image
+print(f"Current Working Directory: {os.getcwd()}")
 
 def draw_text(text, font, color, x, y):
     txt = font.render(text, True, color)
@@ -114,8 +126,7 @@ def home_screen():
                 if button_click(mouse_x, mouse_y, 175, 220, BUTTON_WIDTH, BUTTON_HEIGHT):
                     countdown()
                     game_loop()
-
-                # Customize Button
+                    # Customize Button
                 if button_click(mouse_x, mouse_y, 175, 280, BUTTON_WIDTH, BUTTON_HEIGHT):
                     color_index = (color_index + 1) % len(SNAKE_COLORS)
 
@@ -123,7 +134,9 @@ def home_screen():
                 if button_click(mouse_x, mouse_y, 175, 340, BUTTON_WIDTH, BUTTON_HEIGHT):
                     pygame.quit()
                     sys.exit()
-                    def game_loop():
+
+
+def game_loop():
     snake_head_color = BLACK  # The head color is always black
     snake_tail_color = SNAKE_COLORS[color_index]  # The tail color is selected by the player
     x, y = WIDTH // 2, HEIGHT // 2
@@ -134,8 +147,6 @@ def home_screen():
 
     # Food positions are now fixed with specific colors
     food_positions = [(100, 100), (300, 300), (500, 500)]  # Fixed positions for food
-    food_colors = [RED, GREEN, BLUE]  # Each food piece has a specific color
-
     score = 0
 
     running = True
@@ -194,10 +205,10 @@ def home_screen():
                 length += 1
                 score += 1
 
-        # Draw food as squares with specific colors
-        for i, food_pos in enumerate(food_positions):
+        # Draw food as fish images
+        for food_pos in food_positions:
             food_x, food_y = food_pos
-            pygame.draw.rect(screen, food_colors[i], (food_x, food_y, BLOCK, BLOCK))  # Drawing colored squares
+            screen.blit(fish_image, (food_x, food_y))  # Drawing the fish image instead of colored squares
 
         # Draw snake as a series of circles (rounded body parts)
         for i, part in enumerate(snake):
@@ -218,12 +229,12 @@ def game_over(score):
 
         draw_text("GAME OVER", font_big, RED, 200, 180)
         draw_text(f"Score: {score}", font_small, WHITE, 250, 240)
-
         # Game over buttons
         draw_button("Try Again", 175, 300, BUTTON_WIDTH, BUTTON_HEIGHT, BLACK, WHITE)
         draw_button("Home", 175, 360, BUTTON_WIDTH, BUTTON_HEIGHT, BLACK, WHITE)
 
         pygame.display.update()
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -240,6 +251,5 @@ def game_over(score):
                 # Home Button
                 if button_click(mouse_x, mouse_y, 175, 360, BUTTON_WIDTH, BUTTON_HEIGHT):
                     return
-
 
 home_screen()
